@@ -380,6 +380,43 @@ corrplot::corrplot()
 ## Correlação ----
 round(cor(dados$suic, dados$desemp), 4)
 
+teste <- stats::cor.test(dados$suic, dados$desemp)
+
+teste$statistic
+teste$p.value|>round(5)
+teste$conf.int[1:2]
+
+aux <- cbind(
+  c(
+    teste$statistic, 
+    teste$p.value|>round(5), 
+    teste$conf.int[1:2])
+  )
+
+colnames(aux) <- c("Resultados")
+rownames(aux) <- c("t", "p-valor", "LI", "LS")
+
+aux|>
+  kbl(
+    caption = "Teste de Hipótese para Correlação",
+    digits = 5,
+    format.args=list(big.mark=".", decimal.mark=","),
+    align = "c", row.names = T, booktabs = T
+  )|>
+  kable_styling(
+    full_width = F, position = 'center', 
+    latex_options = c("striped", "HOLD_position", "scale_down", "repeat_header")
+  )|>
+  column_spec(1, bold = T
+  )|>
+  footnote(
+    general = "Teste realizado com 5% de significância",
+    general_title = "Nota:",
+    footnote_as_chunk = T
+  )|>
+kable_material()
+  
+
 ## fig4: Dispersão ----
 dados |>
   ggplot(aes(
@@ -422,15 +459,103 @@ dados |>
 
 ## Modelo ----
 
-lm(suic ~ desemp, data = dados)
-lm(desemp~suic, data = dados)
+mFit <- lm(suic ~ desemp, data = dados)
 
+mFit$coefficients[[1]]
+mFit$coefficients[2]
 
+mFit$coefficients[[1]]|>
+  scales::number(accuracy = 0.0001, big.mark = ".", decimal.mark = ",")
+
+# Jeff
 x = dados$suic
 y = dados$desemp
 m1 <- lm(y ~ x)
 res <- residuals(m1)
 d.ajustados <- predict(m1, as.data.frame(x), interval='confidence')
+# ___________
+
+(dados_mFit_resid <- broom::augment(mFit))
+
+confint(mFit)
+
+# Resíduos ----
+## Gráfico de resíduos padronizads vs preditos ----
+par(mfrow = c(2, 2))
+plot(mFit)
+par(mfrow = c(1, 1))
+
+r1 <- dados_mFit_resid %>% 
+  ggplot() + 
+  geom_point(aes(x = .fitted, y = .resid, color = .resid)) +
+  geom_hline(yintercept = 0, col = "tomato") +
+  labs(
+    x = "Valores Ajustados",
+    y = "Resíduos",
+    title = "Gráfico de Resíduos vs. Valores Ajustados"
+  )+
+  scale_x_continuous(
+    labels = scales::number_format(
+      big.mark = ".",
+      decimal.mark = ","
+    )) +
+  theme_minimal(base_size = 7.5)+
+  theme(legend.position = "none" )
+
+## Gráfico de normalidade dos resíduos ----
+
+set.seed(20231)
+
+r2 <- dados_mFit_resid %>% 
+  ggplot(aes(sample = .std.resid)) + 
+  qqplotr::stat_qq_band(fill = "lightgrey", alpha = 0.5) + # Plota a banda de confiança
+  qqplotr::stat_qq_line(col = "tomato", alpha = 0.8) + # Plota a reta
+  qqplotr::stat_qq_point(col = "blue", shape = 21) + # Plota os pontos
+  labs(
+    x = "Quantil Teórico",
+    y = "Resíduos Padronizados",
+    title = "Gráfico Quantil-Quantil Normal"
+  )+
+  theme_minimal(base_size = 7.5)
+
+r3 <- dados_mFit_resid %>% 
+  ggplot() + 
+  geom_point(aes(x = .fitted, y = sqrt(.std.resid), color = .std.resid)) +
+  geom_hline(yintercept = 0, col = "tomato") +
+  labs(
+    x = "Valores Ajustados",
+    y = "Raiz dos Resíduos Padronizados",
+    title = "Gráfico de Resíduos Padronizados vs. Valores Ajustados \n(Locação - Escala)"
+  )+
+  theme_minimal(base_size = 7.5)+
+  theme(legend.position = "none" )
+
+r1+r2+r3 + patchwork::plot_layout(ncol = 2) +
+  patchwork::plot_annotation(
+  title = "Figura 6: Gráficos para análise de pressupostos.",
+  tag_levels = c("A", "1"), tag_prefix = "Sub Fig. ", tag_sep = ".",
+  tag_suffix = ":") &
+  theme_minimal(base_size = 8) &
+  theme(
+    # title = element_text(size = 8),
+    legend.position = "none",
+    plot.tag.position = c(0, 1),
+    plot.tag = element_text(size = 6, hjust = 0, vjust = -0.6)
+  )
+
+# dados_mFit_resid %>% 
+#   ggplot() + 
+#   geom_point(aes(x = .cooksd, y = .std.resid, color = .std.resid)) +
+#   geom_hline(yintercept = 0, col = "tomato") +
+#   labs(
+#     x = "Valores Ajustados",
+#     y = "Resíduos",
+#     title = "Gráfico de Resíduos vs. Valores Ajustados"
+#   )+
+#   theme_minimal(base_size = 7.5)+
+#   theme(legend.position = "none" )
+
+
 
 
 

@@ -18,6 +18,7 @@ format:
         - bottom=20mm
         - heightrounded
       fig-pos: "H"
+      fig-width: 7
       fig-align: center
       lang: pt-BR
       fontfamily: libertinus
@@ -32,11 +33,11 @@ format:
 \newpage
 
 ## Introdução
-Composto por 54 observações, o conjunto de dados em estudo traz informações pertinentes a Índice de desemprego e a Índice de suicídio nos EUA no período entre 1950 e 2019. 
+Composto por 54 observações, o conjunto de dados em estudo traz informações pertinentes o Índice de desemprego e a Índice de suicídio nos EUA no período entre 1950 e 2019. 
 
 O presente relatório tem como objetivo a introdução das técnicas de Regressão Linear Simples e a pratica da elaboração de relatórios analíticos fundamentados na Análise Exploratória de Dados, preenchendo assim os pré-requisitos solicitados para o conjunto de dados proposto.
 
-## Apresentação
+## Metodologia
 
 Serão realizadas análises sobre o levantamento das Índices de desemprego e o índice de suicídios nos EUA para o período de 1950 a 2019. Ressalta-se que o índice de suicídios foi calculado para cada 1000 habitantes.
 
@@ -117,23 +118,21 @@ dados|>
   )|>
   column_spec(1, bold = F)|>
   footnote(
-    general = "Laboratório 3, Disciplina Análise de Regressão.",
+    general = "Laboratório 3, Disciplina Análise de Regressão 2023.1.",
     general_title = "Fonte:",
-    number = c("DESEMP = Índice de Desemprego", "SUIC = Índice de Suicídio"),
-    number_title = "Legenda: ",
     footnote_as_chunk = T
     )|>
-  # kableExtra::add_footnote(c("Legenda:"), notation = "none")|>
-  # kableExtra::add_footnote(
-  #   c("DESEMP = Índice de Desemprego", "SUIC = Índice de Suicídio"),
-  # notation = "none"
-  # )|>
+  footnote(
+    number = c("DESEMP = Índice de Desemprego", "SUIC = Índice de Suicídio"),
+    number_title = "Legenda: ",
+    footnote_as_chunk = F
+    )|>
   kable_material()
 ```
 
 Para uma primeira análise é possível concluir que a variável Índice de Desemprego apresenta uma maior variabilidade dos dados, em comparação com o Índice de Suicídio, fato esse constatado pelo Coeficiente de Variação, caracterizando assim uma maior homogeneidade dos dados obtidos referente ao o Índice de Suicídio.
 
-Com relação ao Coeficiente de assimetria, ambas as variáveis possuem valores de assimetria positiva, indicando que a maioria dos valores são menores que a média.
+Com relação ao Coeficiente de Assimetria, ambas as variáveis possuem valores de assimetria positiva, indicando que a maioria dos valores são menores que a média.
 Já com base no Coeficiente de Curtose é possível identificar um comportamento Platocúrtico   dos dados, ou seja, um comportamento mais achatado da distribuição dos dados.
 A análise gráfica facilitará a identificação das informações trazidas pela tabela em análise.
 
@@ -223,10 +222,11 @@ hd2 <- dados|>
   ) & theme_minimal(base_size = 8) &
   theme(
     plot.tag.position = c(0, 1),
-    plot.tag = element_text(size = 5.5, hjust = 0, vjust = -0.6),
+    plot.tag = element_text(size = 5.5, hjust = 0, vjust = -0.4),
     legend.position = "none"
   )
 ```
+
 
 Conforme identificado na Tabela 1, a Figura 1 traz a representação gráfica das conclusões realizadas para os dados, no que diz respeito a assimetria e curtose.
 
@@ -278,7 +278,7 @@ b1+b2 + plot_annotation(
 
 ```
 
-A análise dos BoxPlots, Figura 2, traz pouco mais informação, uma vez que agora é possível verificar que não há valores notadamente discrepantes (*outliers*) que poderiam influir negativamente na regressão linear.
+A análise dos *BoxPlots*, Figura 2, traz pouco mais informação, uma vez que agora é possível verificar com mais facilidade a inexistência de valores discrepantes (*outliers*) que poderiam influir negativamente na regressão linear.
 <!-- A provável normalidade dos dados verrificada nas medicadas ateriores não parece ter sido afetada pela análise desses gráficos, uma vez que ainda se pode identificar certa simetria nos dados. -->
 <!-- Entretanto, faz-se necessário a verificação de tal característica, o que será apresentado a seguir. -->
 
@@ -325,9 +325,7 @@ l1/l2 + plot_annotation(
 
 Através da Figura 3 é possível avaliar a evolução dos índices em analise ao longo do tempo, em que é possível identificar uma queda no Índice de Desemprego nos anos finais em que os dados foram coletados, contudo o Índice de Suicídio está apresentando um sinal de queda após um longo período de alta.
 
-A fim de analisar a relação entre as variáveis foi realizado o cálculo do Coeficiente de Correlação de Pearson ($\widehat{\rho}$) medida que avalia o grau da correlação linear entre variáveis, em que se obteve o valor de `r round(cor(dados$suic, dados$desemp), 4)`, caracterizando uma baixa relação entre as variáveis.
-
-A fim de se ter uma melhor percepção acerca dessa relação, se construiu a Figura 4 para avaliação dessa relação entre as variáveis.
+A Figura 4 foi desenvolvida a fim de identificar a relação entre as variáveis em análise.
 
 ```{r fig4:dispersao}
 #| echo: false
@@ -351,11 +349,81 @@ dados |>
   theme(legend.position = "none")
 ```
 
-Corroborando com o Coeficiente de Correlação ($\widehat{\rho}$), não é possível notar uma aparente correlação entre as variáveis, o que pode comprometer todos os resultados seguintes.
+
+Após análise da Figura 4 não se identificou uma evidente correlação entre as variáveis em análise. Para avaliar a força dessa possível correlação foi realizado o cálculo do Coeficiente de Correlação de Pearson ($\widehat{\rho}$), medida que avalia o grau da correlação linear entre variáveis, em que se obteve o valor de `r round(cor(dados$suic, dados$desemp), 4)`, caracterizando uma baixa relação entre as variáveis.
+
+Para avaliar a significância da correlação segue a Tabela 2 com os resultados do Teste de Hipóteses com nível de significância de 5% que tem como hipóteses:
+
+$$H_0: \widehat{\rho} = 0$$
+$$H_1: \widehat{\rho} \neq 0.$$
+
+```{r tab2:correlacao}
+#| echo: false
+#| warning: false
+#| tbl-colum: page
+#| fig-pos: H
+
+
+teste <- stats::cor.test(dados$suic, dados$desemp)
+
+aux <- cbind(
+  c(
+    teste$statistic, 
+    teste$p.value|>round(5), 
+    teste$conf.int[1:2])
+  )
+
+colnames(aux) <- c("Resultados")
+rownames(aux) <- c("t", "p-valor", "LI", "LS")
+
+aux|>
+  kbl(
+    caption = "Teste de Hipótese para Correlação",
+    digits = 5,
+    format.args=list(big.mark=".", decimal.mark=","),
+    align = "c", row.names = T, booktabs = T
+  )|>
+  kable_styling(
+    full_width = F, position = 'center', 
+    latex_options = c("striped", "HOLD_position", "repeat_header")
+  )|>
+  column_spec(1, bold = T
+  )|>
+  footnote(
+    general = "Teste realizado com 5% de significância",
+    general_title = "Nota:",
+    footnote_as_chunk = T
+  )|>
+  footnote(
+    
+    number = c("t = Estatística t-Student",
+                "p-valor = Probabilidade de que a estatística do teste tenha um valor extremo em relação ao valor observado quando a hipótese nula é verdadeira.",
+                "LI: Limite Inferior do Intervalo de Confiança",
+                "LS: Limite Superior do Intervalo de Confiança"),
+    number_title = "Legenda:",
+    footnote_as_chunk = F
+  )|>
+kable_material()
+```
+
+
+Conforme expresso na Tabela 2, levando em consideração o **p-valor** a Hipótese Nula foi rejeitada, e com 95% de confiança se pode afirmar que é significativa a relação linear entre as variáveis em estudo.
 
 ### Regressão Linear
 
-Ainda assim, admitindo que os dados dos Índices de Suicídio realmente possam ser explicados por uma regressão linear foi construída a Figura 5, em que se acrescentou a reta de Regressão aos dados em análise.
+```{r ajuste_mod}
+#| echo: false
+#| warning: false
+
+mFit <- lm(suic ~ desemp, data = dados)
+
+```
+
+
+Tendo em vista a existência de correlação linear entre as variáveis, foi construída a Figura 5, em que se acrescentou a Reta de Regressão Estimada aos dados em análise, sendo esta:
+
+$$ \hat{Y} = `r mFit$coefficients[[1]]|>scales::number(accuracy = 0.0001, big.mark = ".", decimal.mark = ",")` + `r mFit$coefficients[[2]]|>scales::number(accuracy = 0.0001, big.mark = ".", decimal.mark = ",")`X_i$$
+
 
 
 ```{r fig5:dispersao+regressao}
@@ -372,402 +440,33 @@ dados |>
     x = desemp, 
     y = suic, color = suic)) +
   geom_point()+
-  geom_smooth(formula = "y ~ x", method="lm", se=F, color="blue")+
+  geom_smooth(formula = "y ~ x", method="lm", se=T, color="tomato")+
   labs(
-    title = "Figura 5: Relação entre Índice de Desemprego e a Índice de Suicídio entre 1950 e 2019, nos EUA",
+    title = "Figura 5: Acréscimo do Modelo Ajustado",
+    caption = "Acréscimo do modelo ajustado, da equação da reta, dos Coeficientes de \nCorrelação, Coeficiente de Determinação e Coeficiente de Determinação Ajustado",
     x = 'Índice de Desemprego',
     y = 'Índice de Suicídio'
   )+
-  ggpubr::stat_regline_equation(color="blue", label.x = 8, label.y = 10.5, size = 3)+
-  ggpubr::stat_cor(aes(label = ..r.label..),color="blue", method = "pearson", label.x = 7, label.y = 10.5, p.accuracy = 0.001, size = 3)+
+  ggpubr::stat_regline_equation(
+    aes(label = paste(..eq.label.., ..adj.rr.label.., sep = "~`;`~")),
+    color="tomato", label.x = 7, label.y = 11, size = 3)+
+  ggpubr::stat_cor(
+    aes(
+      label = paste(..r.label.., ..rr.label.., sep = "~`;`~")),
+    color="tomato", method = "pearson", label.x = 7, cor.coef.name = "R",
+    label.y = 10.5, p.accuracy = 0.0001, size = 3)+
   theme_minimal(base_size = 8)+
   theme(legend.position = "none")
 ```
 
-### Análise dos Resíduos
 
-A partir do modelo proposto foram feitas as análises gráficas apresentadas na Figura 6.  
+A Figura 5 traz a implementação da reta de regressão ajustada, além da equação da reta e dos Coeficientes de Correlação, Coeficiente de Determinação e Coeficiente de Determinação Ajustado. Tendo em vista o valor do Coeficiente de Determinação é possível constatar que este não é um bom modelo, pois o modelo explica aproximadamente apenas 7,6% das informações, ou seja, apenas 7,6% das informações referentes ao Índice de Suicídio são explicadas pelo Índice de Desemprego, sendo assim não faz sentido continuar a análise baseado neste modelo.
 
-```{r modelo}
-#| warning: false
-#| eval: true
-#| results: false
-#| echo: false
 
-x = dados$suic
-y = dados$desemp
-m1 <- lm(y ~ x)
-res <- residuals(m1)
-d.ajustados <- predict(m1, as.data.frame(x), interval='confidence')
-
-```
-
-```{r fig6}
-#| echo: false
-#| warning: false
-#| tbl-colum: page
-
-d1<- dados |>
-  ggplot(aes(
-    x = d.ajustados[,1], 
-    y = res, color = res)) +
-  geom_point()+
-  labs(
-    title = '',
-    y = 'Resíduos',
-    x = 'Índice de Desemprego Ajustada'
-  )+
-  scale_y_continuous(
-    labels = scales::number_format(
-      big.mark = ".",
-      decimal.mark = ","
-    ))
-
-d2 <- dados |>
-  ggplot(aes(sample=res))+
-    labs(
-    title = '',
-    y = 'Resíduos Studentizados',
-    x = 'Quantis t-Student'
-  )+
-  scale_y_continuous(
-    labels = scales::number_format(
-      big.mark = ".",
-      decimal.mark = ","
-    ))+
-  stat_qq() + stat_qq_line(col="blue") 
-
-d1+d2 + plot_annotation(
-  title = "Figura 6: Análise de resíduos do modelo de regressão proposto.",
-  tag_levels = c("A", "1"), tag_prefix = "Sub Fig. ", tag_sep = ".",
-  tag_suffix = ":") &
-  theme_bw(base_size = 9) &
-  theme(
-    legend.position = "none",
-    plot.tag.position = c(0, 1),
-    plot.tag = element_text(size = 7, hjust = 0, vjust = 0.2)
-  )
-```
-
-A Figura 6 permite observar a falta de homocedasticidade tanto pelo gráfico dos valores ajustados pelo modelo e os resíduos, quanto pelo gráfico dos quantis t-Student. No primeiro caso, não se observa que os pontos fiquem em torno do zero e no segundo, não se ajustam a reta.
-
-```{r modelo2}
-#| warning: false
-#| eval: true
-#| results: false
-#| echo: false
-
-n = length(x)
-beta1 = (sum(x*y) - as.numeric(sum(x)) * as.numeric(sum(y))/n) /
-  (sum(x^2) - ((sum (x))^2)/n)
-beta0 = mean(y) - beta1 * mean(x)
-beta0 = round(beta0,3)
-beta1 = round(beta1,3)
-```
-
-### Estimativas Pontuais
-
-A partir do método de Estimativas de Mínimos Quadrados, pode se obter uma estimativa pontuais para $\hat\beta_0$ = `r beta0` e para $\hat\beta_1$ = `r beta1`.
-
-### Intervalos de Confiança
-
-A partir dos dados é possível obter um intervalo de confiança para as estimativas obtidas.
-No modelo de regressão linear simples as estimativas $\hat\beta_0$ e $\hat\beta_1$ têm distribuição de student, e portanto, pelo método da quantidade pivotal é possível determinar seu intervalo de confiança.
-
-```{r}
-#| warning: false
-#| eval: true
-#| results: false
-#| echo: false
-
-t.tab = dt(0.025,n-2)
-s.xix = sum((x-mean(x))^2)
-ic.beta1 = t.tab*var(y)/(sqrt(s.xix))
-ic.beta0 = t.tab*var(y)*sqrt(sum(x^2))/(sqrt(n*s.xix))
-li.b0 = beta0 - ic.beta0
-ls.b0 = beta0 + ic.beta0
-li.b1 = beta1 - ic.beta1
-ls.b1 = beta1 + ic.beta1
-li.b0 = round(li.b0, 3)
-ls.b0 = round(ls.b0, 3)
-li.b1 = round(li.b1, 3)
-ls.b1 = round(ls.b1, 3)
-```
-
-Procedendo com esses cálculos temos que o intervalo de confiança para $\hat\beta_0$ é \[`r li.b0`, `r ls.b0`\] e o intervalo de confiança de $\hat\beta_1$ é \[`r li.b1`, `r ls.b1`\], para um nível de confiança de 95%.
-É importante notar que o intervalo calculado de $\hat\beta_0$ é bastante largo, compreendendo inclusive valores negativos o que não faz sentido para os dados analizados, logo um itervalo de confiança mais realista para $\hat\beta_0$ é \[0, `r ls.b0`\].
-
-```{r}
-#| warning: false
-#| eval: true
-#| results: false
-#| echo: false
-
-rho = (sum(x*y) - (sum(x)*sum(y)/n)) /
-  (sqrt((sum(x^2) - ((sum(x))^2)/n)*(sum(y^2)- ((sum (y))^2)/n)))
-
-rho = round(rho,3)
-
-t = rho*sqrt((n-2)/(1-rho^2))
-t.tab = dt(0.025,n-2)
-t = round(t,4)
-t.tab = round(t.tab,4)
-resp = "não deverá"
-if (abs(t)>abs(t.tab)) resp = "deverá"
-```
-
-### Teste de Significância
-
-Como vimos anteriormente, a avaliação gráfica da dispersão dos dados não indica claramente uma relação linear entre os dados avaliados.
-Entretanto, pode-se realizar um teste de significância do modelo a fim de melhor compreender quão adequado é esse modelo.
-Tomando o método dos mínimos quadrados, estimou-se o valor do coeficiente de correlação linear dos dados $\hat \rho$ = `r rho`.
-Em seguida calculou-se o valor da estatística temos que $t$ = `r t`.
-Verificou-se que o valor tabelado dessa estatística $t_{(n-1);\alpha/2} =$ `r t.tab`.
-Por fim, comparando os valores absolutos dessas estatísticas, verificamos que a hipótese de correlação nula `r resp` ser rejeitada, ao nível de significância de $\alpha =5\%$.\
-Outra forma de avaliar a siguinificância do modelo é realizar uma análise gráfica dos resíduos do modelo.
-
-### Transformação dos valores
-
-Uma vez que o teste de significância do modelo não apresentou resultado satisfatório, pode-se avaliar a possibilidade de aplicar uma transformação no valores dos dados. Para tanto, pode-se aplicar o método de Box-Cox de avaliação da melhor transformação para os dados.  
-\   
-\   
-\    
-Figura 5: Escolha de $\lambda$ na transformação de Box-Cox.
-
-
-```{r}
-#| warning: false
-#| eval: true
-#| results: false
-#| echo: false
-t.bc <- MASS::boxcox(m1)
-lambda <- t.bc$x[which.max(t.bc$y)]
-```
-
-Como se pode verificar pela Figura 5, o valor de $\lambda$ está próximo ao valor de zero (`r round(lambda,3)`). Neste caso, a melhor transformação para os valores de Y é $log(Y)$, o que levará a estabilização da variância a uma normalização dos dados.
-
-```{r}
-#| warning: false
-#| eval: true
-#| results: false
-#| echo: false
-
-y = log(dados$desemp)
-m1 <- lm(y ~ x)
-res <- residuals(m1)
-
-beta1 = (sum(x*y) - as.numeric(sum(x)) * as.numeric(sum(y))/n) /
-  (sum(x^2) - ((sum (x))^2)/n)
-beta0 = mean(y) - beta1 * mean(x)
-beta0 = round(beta0,3)
-beta1 = round(beta1,3)
-```
-
-
-```{r}
-#| echo: false
-#| warning: false
-#| tbl-colum: page
-
-d1<- dados |>
-  ggplot(aes(
-    y = y, 
-    x = x, color = x)) +
-  geom_point()+
-  labs(
-    title = '',
-    y = 'Índice de Desemprego Ajustada',
-    x = 'Índice de Suicídio'
-  )+
-  scale_y_continuous(
-    limits = c(1,10),
-    labels = scales::number_format(
-      big.mark = ".",
-      decimal.mark = ","
-    ))+
-  geom_smooth(method=lm, se=FALSE)
-
-d1+plot_annotation(
-  title = "Figura 6: Relação entre Índice de Desemprego ajustada e a Índice de Suicídio  \n entre 1950 e 2019, nos EUA e sua regressão linear.") &
-  theme_bw(base_size = 8) &
-  theme(
-    legend.position = "none",
-    plot.tag.position = c(0, 1),
-    plot.tag = element_text(size = 7, hjust = 0, vjust = 0)
-  )
-```
-
-A Figura 6 mostra a dispersão dos dados e o modelo de regressão linear após o ajuste dos valores dos dados. Manteve-se a mesma escala da Figura 3 para evidenciar a transformação, o que leva crer que um melhor ajuste foi obtido.  
-
-```{r}
-#| warning: false
-#| eval: true
-#| results: false
-#| echo: false
-
-t.tab = dt(0.025,n-2)
-s.xix = sum((x-mean(x))^2)
-ic.beta1 = t.tab*var(y)/(sqrt(s.xix))
-ic.beta0 = t.tab*var(y)*sqrt(sum(x^2))/(sqrt(n*s.xix))
-li.b0 = beta0 - ic.beta0
-ls.b0 = beta0 + ic.beta0
-li.b1 = beta1 - ic.beta1
-ls.b1 = beta1 + ic.beta1
-li.b0 = round(li.b0, 3)
-ls.b0 = round(ls.b0, 3)
-li.b1 = round(li.b1, 3)
-ls.b1 = round(ls.b1, 3)
-```
-
-
-Desta forma, refazendo as análise anteriores, verifica-se que, pode-se obter novas estimativas para $\hat\beta_0^*$ = `r beta0`, com intervalo de confiança de \[`r li.b0`, `r ls.b0`\] e $\hat\beta_1^*$ = `r beta1`, com intervalo de confiança de \[`r li.b1`, `r ls.b1`\], para um nível de confiança de 95%. É importante notar que os novos intervalos calculados são muito mais estreitos e indicam um melhor ajuste do modelo. 
-
-```{r}
-#| warning: false
-#| eval: true
-#| results: false
-#| echo: false
-
-rho = (sum(x*y) - (sum(x)*sum(y)/n)) /
-  (sqrt((sum(x^2) - ((sum(x))^2)/n)*(sum(y^2)- ((sum (y))^2)/n)))
-
-rho = round(rho,3)
-
-t = rho*sqrt((n-2)/(1-rho^2))
-t.tab = dt(0.025,n-2)
-t = round(t,4)
-t.tab = round(t.tab,4)
-resp = "não deverá"
-if (abs(t)>abs(t.tab)) resp = "deverá"
-```
-
-
-O novo coeficiente de correlação linear dos dados $\hat \rho^*$ = `r rho`, com o valor da estatística $t$ = `r t` e $t_{(n-1);\alpha/2} =$ `r t.tab`, logo, a nova hipótese de correlação nula `r resp` ser rejeitada, ao nível de significância de $\alpha =5\%$.  
-
-
-
-### Testes de diagnóstico
-
-Pode-se ainda utilizar um conjunto de testes de diagnóstico para confirmar este novo teste de significância.
-Como:
-
-::: incrementyal
--   Teste de Kolmogorov-Smirnov\
--   Teste de Shapiro-Wilks\
--   Teste de Goldfeld-Quandt\
--   Teste de Breush-Pagan\
--   Teste de Park\
--   Teste F para linearidade\
--   Teste para avaliação da independência dos resíduos\
-:::
-
-##### Teste de Kolmogorov-Smirnov
-
-```{r}
-#| warning: false
-#| eval: true
-#| results: false
-#| echo: false
-t.ks = ks.test(res, "pnorm", mean(res), sd(res))
-```
-
-Avalia o grau de concordância entre a distribuição de um conjunto de valores observados e determinada distribuição teórica. Consiste em comparar a distribuição de frequência acumulada da distribuição teórica com aquela observada. Realizado o teste obteve-se um p-valor de `r round(t.ks[[2]][1],3)`, o que inviabiliza rejeitar a hipótese de que haja normalidade entre os dados, com um grau de confiabilidade minimamente razoável.
-
-##### Teste de Shapiro-Wilks
-
-```{r}
-#| warning: false
-#| eval: true
-#| results: false
-#| echo: false
-
-t.sw = shapiro.test(res)
-
-```
-
-O teste de Shapiro-Wilks é um procedimento alternativo ao teste de Kolmogorov-Smirnov para avaliar normalidade.
-Realizado o teste obteve-se um p-valor de `r round(t.sw[[2]][1],3)`, o que, semelhantemente, inviabiliza rejeitar a hipótese de que haja normalidade entre os dados, com um grau de confiabilidade minimamente razoável.
-
-##### Teste de Goldfeld-Quandt
-
-```{r}
-#| warning: false
-#| eval: true
-#| results: false
-#| echo: false
-
-t.gq = gqtest(m1)
-
-```
-
-Esse teste envolve o ajuste de dois modelos de regressão, separando-se as observações das duas extremidades da distribuição da variável dependente.
-Realizado o teste obteve-se um p-valor de `r round(t.gq[[5]][1],3)`, o que demanda rejeitar a hipótese de que haja homocedasticidade entre os dados, com um grau de confiabilidade de 95%. Entretanto, como o p-valor obtido é próximo do necessário para a rejeição da hipotese nula, cabe um novo teste para a confirmação do resultado obtido.
-
-##### Teste de Breush-Pagan
-
-```{r}
-#| warning: false
-#| eval: true
-#| results: false
-#| echo: false
-
-t.bp = bptest(m1, studentize = FALSE)
-```
-
-Esse teste é baseado no ajuste de um modelo de regressão em que a variável dependente é definida pelos resíduos do modelo de interesse.
-Se grande parte da variabilidade dos resíduos não é explicada pelo modelo, então rejeita-se a hipótese de homocedasticidade.
-Realizado o teste obteve-se um p-valor de `r round(t.bp[[4]][1],3)`, desta foram deve-se rejeitar a hipótese de que haja homocedasticidade entre os dados, com um grau de confiabilidade de 95%.
-
-##### Teste de Park
-
-```{r}
-#| warning: false
-#| eval: true
-#| results: false
-#| echo: false
-res2 <- res^2
-t.p = summary(lm(res2 ~ x))
-```
-
-Esse teste é baseado no ajuste de um modelo de regressão em que a variável dependente é definida pelos quadrados dos resíduos do modelo de interesse.
-Nesse caso, se $\beta_1$ diferir significativamente de zero, rejeita-se a hipótese de homocedasticidade.
-O valor de $\beta_1$ obtido no teste foi de `r round(t.p[[4]][2],3)` com p-valor de `r round(t.p[[4]][8],3)`.
-Por esse teste não se deve rejeitar a hipótese de homocedasticidade, com confiabilidade de 95%.
-
-##### Teste F para linearidade
-
-```{r}
-#| warning: false
-#| eval: true
-#| results: false
-#| echo: false
-m_kmedias <- lm(y ~ factor(x))
-t.fl = anova(m1, m_kmedias)
-```
-
-O teste da falta de ajuste permite testar formalmente a adequação do ajuste do modelo de regressão.
-Neste ponto assume-se que os pressupostos de normalidade, variância constante e independência são satisfeitos, como demosntrado pelos testes realizados. A ideia central para testar a linearidade é decompor SQRes em duas partes: erro puro e falta de ajuste que vão contribuir para a definição da estatística de teste F.
-Realizado o teste obteve-se um valore de p-valor igual a `r round(t.fl[[6]][2],3)`, o que demanda a rejeição da hipótese que há uma relação linear entre as variáveis. 
-
-
-##### Teste para avaliação da independência dos resíduos
-
-```{r}
-#| warning: false
-#| eval: true
-#| results: false
-#| echo: false
-t.dw = dwtest(m1)
-```
-
-Tendo em vista, o resultado obtido no teste anterior esse teste pode esclarecer ainda mais o ajuste do modelo.   
-O teste para avaliação da independência dos resíduos é utilizado para detectar a presença de autocorrelação provenientes de análise de regressão.  Realizando o teste obteve-se um valor de p-valor aproximadadente igual a `r round(t.dw[[4]][1],3)`, indicando que se deve rejeitar a hipotese que não existe correlação serial entre os dados, com uma confiança de 95%.
 
 ## Conclusão
 
-Em uma análise preliminar verificou-se que os dados apresentavam certa normalidade, mas graficamente não podia se afirmar que estabelecessem uma realção linear. Aplicando-se o método dos quadrados ao modelo de regressão linear proposto, verificou-se que o mesmo não obteve o resultado desejado em um teste de significância. Por conta deste teste, propÔS-se realizar uma transformação dos dados conforme avaliação proposta por Box-Cox. A transformação logarítimica dos dados levou a uma normalização e homocedasticidade conforme verificada pelos testes realizados. Entretanto, a trasformação que já havia obtido um resultado insatisfatório no novo teste de significância, não foi capaz de obter um melhor resultado na avaliação de sua linearidade por um teste F. Assim, tentou-se avaliar se haveria uma dependência linear entre os resíduos do modelo, o que não se provou aceitável.   
-Desta forma, embora a transformação tenha garantido as premissas para aplicação de uma regressão linear essa não foi suficiente para explicar o comportamento dos dados e isto não se deveu a uma possível correlação serial dos resíduos. 
-
+Embora havendo uma correlação linear entre as variáveis, esta não foi suficientemente forte para viabilizar a construção de um modelo de Regressão Linear Simples, mesmo sendo faeita a estimação da reta, esta não foi suficiente para explicar significativamente os Índices de Suicídio.
 
 
 
