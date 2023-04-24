@@ -212,7 +212,7 @@ d2 <- dados |>
     legend.position = "none"
   )
 
-## Hist + Dens ----
+## fig1: Hist + Dens ----
 hd1 <- dados|>
   ggplot() +
   aes(x = desemp) +
@@ -294,7 +294,7 @@ hd2 <- dados|>
     legend.position = "none"
   )
 
-## BoxPlot ----
+## fig2: BoxPlot ----
 b1 <- dados|>
   ggplot(aes(y = desemp)) +
   geom_boxplot(col="darkblue", fill="skyblue", alpha = 0.5)+
@@ -335,39 +335,18 @@ b1+b2 + plot_annotation(
     plot.tag = element_text(size = 8, hjust = 0, vjust = -0.6)
   )
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-## Graf. Linha ----
-
-library(hrbrthemes)
-
-dados|>
+## fig:3 Graf. Linha ----
+l1 <- dados|>
   ggplot(aes(x = ano, y = desemp))+
-  geom_line(color="#69b3a2", size=1, alpha=0.9)+
+  geom_line(color="blue", size=1, alpha=0.9)+
   labs(
     title = "Índice de Demsemprego por ano",
     x = "Ano",
     y = "Índice de Desemprego"
   )+
   theme_bw()
-  theme_ipsum()
 
-dados|>
+l2 <- dados|>
   ggplot(aes(x = ano, y = suic))+
   geom_line(color="blue", size=1, alpha=0.9)+
   labs(
@@ -377,11 +356,89 @@ dados|>
   )+
   theme_bw()
 
+l1/l2 + plot_annotation(
+  title = "Figura 3: Evolução dos Índices de desemprego e suicídio \nnos EUA entre 1950 e 2019",
+  tag_levels = c("A", "1"), tag_prefix = "Sub Fig. ", tag_sep = ".",
+  tag_suffix = ":") &
+  theme_bw(
+    base_size = 10
+  ) &
+  theme(
+    # title = element_text(size = 8),
+    legend.position = "none",
+    plot.tag.position = c(0, 1),
+    plot.tag = element_text(size = 8, hjust = 0, vjust = -0.6)
+  )
+
+# Teste
 dados|>
   select(suic, desemp)|>
   # cor()|>
   GGally::ggpairs()
 corrplot::corrplot()
+
+## Correlação ----
+round(cor(dados$suic, dados$desemp), 4)
+
+## fig4: Dispersão ----
+dados |>
+  ggplot(aes(
+    x = desemp, 
+    y = suic, color = suic)) +
+  geom_point()+
+  labs(
+    title = "Figura 4: Relação entre Índice de Desemprego e a Índice de Suicídio  \n entre 1950 e 2019, nos EUA",
+    x = 'Índice de Desemprego',
+    y = 'Índice de Suicídio'
+  )+
+  theme_bw()+
+  theme(legend.position = "none")
+
+## fig5: Disp+Reg ----
+dados |>
+  ggplot(aes(
+    x = desemp, 
+    y = suic, color = suic)) +
+  geom_point()+
+  geom_smooth(formula = "y ~ x", method="lm", se=F, color="red", fill="#69b3a2")+
+  labs(
+    title = "Figura 5: Relação entre Índice de Desemprego e a Índice de Suicídio  \n entre 1950 e 2019, nos EUA",
+    x = 'Índice de Desemprego',
+    y = 'Índice de Suicídio'
+  )+
+  ggpubr::stat_regline_equation(color="red", label.x = 8, label.y = 10.5, size = 3)+
+  ggpubr::stat_cor(aes(label = ..r.label..),color="red", method = "pearson", label.x = 7, label.y = 10.5, p.accuracy = 0.001, size = 3)+
+  # annotate("text", x = 7, y = 10.8,
+  #          label = "Modelo Ajustado:",
+  #          size=3, color="blue")+
+  # annotate("text", x = 7, y = 12,
+  #          label = "Coeficiente de Correlação:",
+  #          size=3, color="blue")+
+  theme_bw()+
+  theme(legend.position = "none")
+  # geom_smooth(method=lm, se = F)
+
+# Regressão ----
+
+## Modelo ----
+
+lm(suic ~ desemp, data = dados)
+lm(desemp~suic, data = dados)
+
+
+x = dados$suic
+y = dados$desemp
+m1 <- lm(y ~ x)
+res <- residuals(m1)
+d.ajustados <- predict(m1, as.data.frame(x), interval='confidence')
+
+
+
+
+
+
+
+
 
 
 
