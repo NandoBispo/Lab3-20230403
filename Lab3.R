@@ -479,6 +479,62 @@ d.ajustados <- predict(m1, as.data.frame(x), interval='confidence')
 
 confint(mFit)
 
+# Avaliação do Modelo (Significância) ----
+fit_anova <- anova(mFit)
+fit_sumario <- summary(mFit)
+ic_parametros <- confint(mFit)
+
+
+(round(summary(mFit)$coef[,4],5)) #p-val 
+(summary(mFit)$coef[,3]) #t
+(summary(mFit)$coef[,2]) #erro
+(summary(mFit)$coef[,1]) #est
+
+fit_sumario[["coefficients"]] %>% tibble::as_tibble() %>% 
+  kbl(
+    caption = "Tabela 1: Medidas Resumo.",
+    digits = 4,
+    format.args=list(big.mark=".", decimal.mark=","),
+    align = "c", 
+    row.names = T,
+    col.names =
+      c("Estimativa", "Erro Padrão", "Estatística t", "p-valor")
+  ) %>% 
+  kable_material(c("striped", "hover", "condensed"))|>
+  kable_material()
+
+fit_anova %>%
+  kbl(
+    caption = "Tabela 1: Medidas Resumo.",
+    digits = 4,
+    format.args=list(big.mark=".", decimal.mark=","),
+    align = "c", 
+    row.names = F,
+    col.names =
+      c("GL", "SQ", "QM", "Estatística", "p-valor")
+  ) %>%
+  kable_material(c("striped", "hover", "condensed"))|>
+  kable_material()
+
+ic_parametros %>% 
+  kbl(
+    caption = "Tabela 1: Medidas Resumo.",
+    digits = 4,
+    format.args=list(big.mark=".", decimal.mark=","),
+    align = "c", 
+    row.names = T
+    # col.names =
+    #   c("GL", "SQ", "QM", "Estatística", "p-valor")
+  ) %>%
+  kable_material(c("striped", "hover", "condensed"))|>
+  kable_material()
+
+
+tidy(mFit)
+
+glance(mFit)
+
+
 # Resíduos ----
 ## Gráfico de resíduos padronizads vs preditos ----
 par(mfrow = c(2, 2))

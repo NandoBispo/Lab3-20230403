@@ -396,20 +396,20 @@ aux|>
   )|>
   footnote(
     
-    number = c("t = Estatística t-Student",
-                "p-valor = Probabilidade de que a estatística do teste tenha um valor extremo em relação ao valor observado quando a hipótese nula é verdadeira.",
+    number = c("t: Estatística t-Student",
+                "p-valor: Menor nível de significância para o qual rejeita-se H0 com os dados observados",
                 "LI: Limite Inferior do Intervalo de Confiança",
                 "LS: Limite Superior do Intervalo de Confiança"),
     number_title = "Legenda:",
     footnote_as_chunk = F
   )|>
-kable_material()
+  kable_material()
 ```
 
 
-Conforme expresso na Tabela 2, levando em consideração o **p-valor** a Hipótese Nula foi rejeitada, e com 95% de confiança se pode afirmar que é significativa a relação linear entre as variáveis em estudo.
+Conforme expresso na Tabela 2, levando em consideração o **p-valor** a Hipótese Nula foi rejeitada, e com 95% de confiança se pode afirmar que **é significativa a relação linear entre as variáveis em estudo.**
 
-### Regressão Linear
+## Regressão Linear
 
 ```{r ajuste_mod}
 #| echo: false
@@ -420,11 +420,111 @@ mFit <- lm(suic ~ desemp, data = dados)
 ```
 
 
-Tendo em vista a existência de correlação linear entre as variáveis, foi construída a Figura 5, em que se acrescentou a Reta de Regressão Estimada aos dados em análise, sendo esta:
+<!-- Tendo em vista a existência de correlação linear entre as variáveis, foi construída a Figura 5, em que se acrescentou a Reta de Regressão Estimada aos dados em análise (em valores aproximados), sendo esta: -->
 
-$$ \hat{Y} = `r mFit$coefficients[[1]]|>scales::number(accuracy = 0.0001, big.mark = ".", decimal.mark = ",")` + `r mFit$coefficients[[2]]|>scales::number(accuracy = 0.0001, big.mark = ".", decimal.mark = ",")`X_i$$
+Tendo em vista a existência de correlação linear entre as variáveis, foi realizado o ajuste do modelo cuja equação é apresentada a seguir:
 
 
+$$ \hat{Y_i} = `r mFit$coefficients[[1]]|>scales::number(accuracy = 0.0001, big.mark = ".", decimal.mark = ",")` + `r mFit$coefficients[[2]]|>scales::number(accuracy = 0.0001, big.mark = ".", decimal.mark = ",")`X_i, i = 1, ..., n.$$
+
+### Significância do modelo
+
+Tendo em vista a necessidade de se avaliar a significância dos parâmetros, o teste de hipótese para tal situação será realizado, contendo as seguintes hipóteses:
+
+$$H_0: \hat{\beta_0} = 0$$
+$$H_1: \hat{\beta_0} \neq 0.$$
+
+As Tabelas 3, 4 e 5 trazem os principais resultados da sumarização dos dados do modelo ajustado, resultados da tabela ANOVA e o intervalo de confiança para os parâmetros, possibilitando assim inferir com base no teste acima mencionado.
+
+```{r tab3:5}
+#| echo: false
+#| warning: false
+
+fit_anova <- anova(mFit)
+fit_sumario <- summary(mFit)
+ic_parametros <- confint(mFit)
+
+
+fit_sumario[["coefficients"]] %>% tibble::as_tibble() %>% 
+  kbl(
+    caption = "Sumarização do modelo ajustado.",
+    digits = 4,
+    format.args=list(big.mark=".", decimal.mark=","),
+    align = "c", 
+    row.names = F,
+    col.names =
+      c("Estimativa", "Erro Padrão", "Estatística t", "p-valor")
+  ) %>% 
+    footnote(
+    number = c("Linha 1: Dados referentes a β0", "Linha 2: Dados referentes a β1"),
+    number_title = "Legenda:",
+    footnote_as_chunk = F
+    )|>
+    kable_styling(
+    full_width = F, position = 'center', 
+    latex_options = c("striped", "HOLD_position", "repeat_header"))|>
+    column_spec(1, bold = F)|>
+    kable_material()
+
+fit_anova %>%
+  kbl(
+    caption = "Resultados da ANOVA.",
+    digits = 4,
+    format.args=list(big.mark=".", decimal.mark=","),
+    align = "c", 
+    row.names = F,
+    col.names =
+      c("GL", "SQ", "QM", "Estatística", "p-valor")
+  ) %>%
+    footnote(
+    number = c(
+      "Linha 1: Dados referentes a β0", 
+      "Linha 2: Dados referentes a β1",
+      "GL: Graus de Liberdade", 
+      "SQ: Soma de Quadrados", 
+      "QM: Quadrado Médio", 
+      "Estatística: F-Snedecor"
+      ),
+    number_title = "Legenda:",
+    footnote_as_chunk = F
+    )|>
+    kable_styling(
+    full_width = F, position = 'center', 
+    latex_options = c("striped", "HOLD_position", "repeat_header")
+    )|>
+    column_spec(1, bold = F
+    )|>
+    kable_material()
+
+ic_parametros %>% 
+  kbl(
+    caption = "Intervalo de Confiança.",
+    digits = 4,
+    format.args=list(big.mark=".", decimal.mark=","),
+    align = "c", 
+    row.names = F,
+    col.names =
+      c("α/2 = 2,5%", "1-α/2 = 97,5%")
+  ) %>%
+    footnote(
+    number = c("Linha 1: Dados referentes a β0", "Linha 2: Dados referentes a β1"),
+    number_title = "Legenda:",
+    footnote_as_chunk = F
+    )|>
+    kable_styling(
+    full_width = F, position = 'center', 
+    latex_options = c("striped", "HOLD_position", "repeat_header")
+    )|>
+    column_spec(1, bold = F
+    )|>
+  kable_material()
+```
+
+Analisando a Tabela 3, que traz os dados sumarizados do modelo ajustado, é possível constatar que tanto $\hat{\beta_0}$ quanto $\hat{\beta_1}$ são significantes para o modelo ajustado, com base no p-valor.
+
+A Tabela 4, que traz os resultados da tabela ANOVA, corrobora com a significância do $\hat{\beta_1}$, pois sendo o p-valor menor que o nível de significância ($\alpha$) possibilita rejeitar $H_0$.
+
+A Tabela 5, que traz o Intervalo de Confiança para os parâmetros estimados, mostra que com 95% de confiança é possível afirmar que o verdadeiro valor de $\hat{\beta_0}$ está entre (10,07; 11,98) e que o verdadeiro valor de $\hat{\beta_1}$ está entre (0,004; 0,32).
 
 ```{r fig5:dispersao+regressao}
 #| echo: false
@@ -442,7 +542,7 @@ dados |>
   geom_point()+
   geom_smooth(formula = "y ~ x", method="lm", se=T, color="tomato")+
   labs(
-    title = "Figura 5: Acréscimo do Modelo Ajustado",
+    title = "Figura 5: Reta Ajustada",
     caption = "Acréscimo do modelo ajustado, da equação da reta, dos Coeficientes de \nCorrelação, Coeficiente de Determinação e Coeficiente de Determinação Ajustado",
     x = 'Índice de Desemprego',
     y = 'Índice de Suicídio'
@@ -460,13 +560,13 @@ dados |>
 ```
 
 
-A Figura 5 traz a implementação da reta de regressão ajustada, além da equação da reta e dos Coeficientes de Correlação, Coeficiente de Determinação e Coeficiente de Determinação Ajustado. Tendo em vista o valor do Coeficiente de Determinação é possível constatar que este não é um bom modelo, pois o modelo explica aproximadamente apenas 7,6% das informações, ou seja, apenas 7,6% das informações referentes ao Índice de Suicídio são explicadas pelo Índice de Desemprego, sendo assim não faz sentido continuar a análise baseado neste modelo.
+A Figura 5 traz a implementação da reta de regressão ajustada, além da equação da reta e dos Coeficientes de Correlação, Coeficiente de Determinação e Coeficiente de Determinação Ajustado. Tendo em vista o valor do Coeficiente de Determinação é possível constatar que este não é um bom modelo, pois não explica a variabilidade total dos dados, explicando aproximadamente 7,6% das informações, ou seja, apenas 7,6% das informações referentes ao Índice de Suicídio são explicadas pelo Índice de Desemprego, sendo assim não faz sentido continuar a análise baseado neste modelo.
 
 
 
 ## Conclusão
 
-Embora havendo uma correlação linear entre as variáveis, esta não foi suficientemente forte para viabilizar a construção de um modelo de Regressão Linear Simples, mesmo sendo faeita a estimação da reta, esta não foi suficiente para explicar significativamente os Índices de Suicídio.
+Embora tenha-se constatado haver uma correlação linear entre as variáveis em análise, tenha-se avaliando os parâmetros do modelo ajustado e os mesmos sendo significativos, com base nas técnicas aprendidas até o momento, se conclui que o modelo estimado não é adequado para explicar a variabilidade total dos dados com base no Coeficiente de Determinação calculado, ou seja, se conclui que o modelo não foi suficiente para explicar significativamente os Índices de Suicídio.
 
 
 
